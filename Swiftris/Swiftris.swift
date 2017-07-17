@@ -14,7 +14,7 @@ let StartingRow = 0
 let PreviewColumn = 12
 let PreviewRow = 1
 let PointsPerLine = 10
-let LevelThreshold = 500
+let LevelThreshold = 200
 
 // MARK: - Delegate declaration
 protocol SwiftrisDelegate {
