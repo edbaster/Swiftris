@@ -9,7 +9,7 @@
 import UIKit
 import SpriteKit
 
-class GameViewController: UIViewController, UIGestureRecognizerDelegate {
+class GameViewController: UIViewController {
 
     // MARK: - Properties
     fileprivate var scene: GameScene!
@@ -45,8 +45,26 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     }
 
     @IBAction func didPan(sender: UIPanGestureRecognizer) {
-
+        let currentPoint = sender.translation(in: view)
+        if let originalPoint = panPointReference {
+            if abs(currentPoint.x - originalPoint.x) > (BlockSize * 0.9) {
+                if sender.velocity(in: view).x > CGFloat(0) {
+                    swiftris.moveShapeRight()
+                    panPointReference = currentPoint
+                } else {
+                    swiftris.moveShapeLeft()
+                    panPointReference = currentPoint
+                }
+            }
+        } else if sender.state == .began {
+            panPointReference = currentPoint
+        }
     }
+
+    @IBAction func didSwipe(_ sender: UISwipeGestureRecognizer) {
+        swiftris.dropShape()
+    }
+    
 
     // MARK: - Private Methods
     private func didTick() {
@@ -88,7 +106,10 @@ extension GameViewController: SwiftrisDelegate {
     }
 
     func gameShapeDidDrop(swiftris: Swiftris) {
-
+        scene.stopTicking()
+        scene.redrawShape(shape: swiftris.fallingShape!) {
+            swiftris.letShapeFall()
+        }
     }
 
     func gameShapeDidLand(swiftris: Swiftris) {
@@ -100,3 +121,42 @@ extension GameViewController: SwiftrisDelegate {
         scene.redrawShape(shape: swiftris.fallingShape!) {}
     }
 }
+
+// MARK: Gesture Recognizer Methods
+extension GameViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer is UISwipeGestureRecognizer {
+            if otherGestureRecognizer is UIPanGestureRecognizer {
+                return true
+            }
+        } else if gestureRecognizer is UIPanGestureRecognizer {
+            if otherGestureRecognizer is UITapGestureRecognizer {
+                return true
+            }
+        }
+        return false
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
